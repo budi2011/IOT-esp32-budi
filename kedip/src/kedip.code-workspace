@@ -1,9 +1,8 @@
 {
-	"folders": [
-		{
-			"name": "kedip",
-			"path": ".."
-		}
-	],
-	"settings": {}
+    "folders": [
+        {
+            "name": "tugas2",
+            "path": "../../tugas2"
+        }
+    ]
 }
