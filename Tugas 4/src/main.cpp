@@ -33,10 +33,10 @@ void state();
 bool changeStatus = false;
 portMUX_TYPE gpioIntMux = portMUX_INITIALIZER_UNLOCKED;
 
-char readData[32], receiveData[32];
 int dataIndex = 0;
 int incomingByte = 0;
 String dataSerial;
+char myId[32], myPass[32];
 
 byte buff[2];
 
@@ -69,11 +69,13 @@ void setup() {
     Serial.print("Status autobrightness Off");
   }
   Serial.println();
+  Serial.println("Data Parameter WIFI :");
   bacaPWifi(32);
-  String ssid = getValue(setData,';',0);
-  String password = getValue(setData,';',1);
-  Serial.println("SSID :" + ssid);
-  Serial.println("Password :" + password);
+  Serial.print("SSID : ");
+  Serial.println(setData);
+  bacaPWifi(64);
+  Serial.print("Password : ");
+  Serial.println(setData);
   initLed();
   // put your setup code here, to run once:
 }
@@ -85,9 +87,15 @@ void loop() {
       dataSerial = Serial.readString();
       Serial.print("Menerima Parameter setting WIFI : ");// read the incoming data as string
       Serial.println(dataSerial);
-      int len = dataSerial.length();
-      dataSerial.toCharArray(receiveData, len);
-      tulisPWifi(32,len,receiveData);
+      Serial.println("Start Write WIFI setting ..........");
+      String id = getValue(dataSerial,';',0);
+      String pass = getValue(dataSerial,';',1);
+      int len_id = id.length();
+      int len_pass = pass.length();
+      id.toCharArray(myId, len_id+1);
+      pass.toCharArray(myPass, len_pass+1);
+      tulisPWifi(32, len_id, myId);
+      tulisPWifi(64, len_pass, myPass);
       delay(1000);
     }
  
@@ -186,8 +194,11 @@ void bacaEeprom(int address)
   }
 }
 void tulisPWifi(int address, int EEPROM_SIZE, char * data){
-  Serial.print("Start Write WIFI setting ..........");
-  Serial.println();
+  //reset eeprom address 31 dan 64 replace data baru
+  for (int i = 0; i < 31; i++) {
+      EEPROM.write(address+i, 0);
+  }
+  //new data parameter wifi
   for (int i = 0; i < EEPROM_SIZE; i++){
     EEPROM.write(address + i, data[i]);
   }
@@ -196,9 +207,7 @@ void tulisPWifi(int address, int EEPROM_SIZE, char * data){
 
 void bacaPWifi(int address)
 {
-  Serial.print("Data Parameter WIFI :");
-  Serial.println();
-  for (int i = 0; i < 200; i++)
+  for (int i = 0; i < 256; i++)
   {
      setData[i] = EEPROM.read(address + i);
   }
